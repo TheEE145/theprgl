@@ -1,0 +1,19 @@
+{
+  "name": "catxiso",
+  "version": "1.0.0",
+  "description": "custom programming launguage",
+  "main": "./bin/catxiso-run.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "TheEE145",
+  "license": "ISC",
+  "bin": {
+    "catxiso-run": "./bin/catxiso-run.js"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "process": "^0.11.10"
+  }
+}
