@@ -7,6 +7,7 @@ let
     fragment,
     from,
     func,
+    line,
     as2;
 
 class RunHandler {
@@ -41,6 +42,8 @@ class RunHandler {
     static Runtime = class {
         static sessionVars = {};
         static stack = {};
+        static line;
+        static end;
 
         static Arguments = class {
             static returnargs = [];
@@ -126,9 +129,16 @@ class RunHandler {
 
         static exec(code, isProject) {
             this.sessionVars = {};
+            this.line = 0;
+            this.end = false;
 
             code = code.split(';');
-            for(let line = 0; line < code.length; line++) {
+            for(this.line = 0; this.line < code.length; this.line++) {
+                line = this.line;
+                if(this.end) {
+                    break;
+                };
+
                 fragment = RunHandler.Reader.trim(code[line]).split(' ');
 
                 if(fragment[0] == '') {
@@ -197,11 +207,6 @@ class RunHandler {
                 };
 
                 func = eval(`RunHandler.Runtime.sessionVars.${fragment[0]}`);
-
-                if(typeof func === 'undefined') {
-                    err(`${fragment[0]} not defined`);
-                };
-
                 if(typeof func == 'function') {
                     lastargOfFuncHandler = lastargOfFuncHandler.substring(1, lastargOfFuncHandler.length);
                     fragment.shift();
@@ -210,8 +215,6 @@ class RunHandler {
                     func(...this.Arguments.returnargs);
                 };
             };
-
-            console.log(this.sessionVars);
         };
     };
 };

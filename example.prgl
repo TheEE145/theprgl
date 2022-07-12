@@ -1,7 +1,12 @@
 import System from prgl;
+import Flow from prgl;
 
-define x = 9*2;
-System.Console.print(x);
-System.Console.print("xd");
+define i = 0;
+System.Console.print(i);
+System.Op.add("i", 1);
 
-System.Console.throw("i am error");
+Flow.jump(3, "@i <= 10");
+System.Console.print("end");
+
+Flow.end();
+System.Console.print("don`t print");
