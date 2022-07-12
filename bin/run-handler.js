@@ -204,7 +204,9 @@ class RunHandler {
 
                 if(typeof func == 'function') {
                     lastargOfFuncHandler = lastargOfFuncHandler.substring(1, lastargOfFuncHandler.length);
-                    this.Arguments.debug(lastargOfFuncHandler);
+                    fragment.shift();
+
+                    this.Arguments.debug(`${lastargOfFuncHandler} ${fragment.join(' ')}`);
                     func(...this.Arguments.returnargs);
                 };
             };

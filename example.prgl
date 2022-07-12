@@ -2,3 +2,6 @@ import System from prgl;
 
 define x = 9*2;
 System.Console.print(x);
+System.Console.print("xd");
+
+System.Console.throw("i am error");
