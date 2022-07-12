@@ -1,3 +1,4 @@
 import System from prgl;
 
-System.Console.print(System);
+define x = 9*2;
+System.Console.print(x);
