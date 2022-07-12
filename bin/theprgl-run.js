@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const process = require('process');
+const RunHandler = require('./run-handler');
 const fs = require('fs');
 const err = require('./err');
 
@@ -42,6 +43,6 @@ if(!fs.lstatSync(file).isDirectory()) {
         err('this file not .prgl or .theprgl exception');
     };
     
-    console.log('succes');
+    RunHandler.Runtime.exec(fs.readFileSync(file, 'utf8'));
     process.exit(0);
 };
