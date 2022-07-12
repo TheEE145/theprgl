@@ -7,6 +7,7 @@ let
     component,
     fragment,
     package3,
+    session,
     from,
     func,
     as2;
@@ -38,16 +39,94 @@ class RunHandler {
 
             return text;
         };
-
-        static unArgument = function(text) {
-            text = text.substring(1, text.length - 1);
-            
-        };
     };
 
     static Runtime = class {
         static sessionVars = {};
         static stack = {};
+
+        static Arguments = class {
+            static returnargs = [];
+            static stringnow = false;
+            static skip = false;
+            static arg = '';
+
+            static debug(text) {
+                let args = RunHandler.Runtime.Arguments;
+
+                text = text.substring(1, text.length);
+
+                args.returnargs = [];
+                args.stringnow = false;
+                args.skip = false;
+                args.arg = '';
+
+                function addarg2() {
+                    args.returnargs.push(args.arg);
+                };
+
+                function addarg() {
+                    if(args.arg.startsWith('"') && args.arg.endsWith('"')) {
+                        args.arg = args.arg.substring(1, args.arg.length - 1);
+                        addarg2();
+                        return;
+                    };
+
+                    try {
+                        args.arg = Math.floor(new Function(`return ${args.arg}`)());
+                        addarg2();
+                    } catch {
+                        args.arg = eval(`RunHandler.Runtime.sessionVars.${fragment[0]}`);
+
+                        if(args.arg === 'undefined') {
+                            err(`${args.arg} not defined`);
+                        };
+
+                        addarg2();
+                    };
+                };
+
+                for(let char, i = 0; i < text.length - 1; i++) {
+                    char = text[i];
+                    if(char == '"') {
+                        args.arg += '"';
+                        if(!args.skip) {
+                            args.stringnow = !args.stringnow;
+                            continue;
+                        };
+                    };
+
+                    if(char == ',') {
+                        if(!args.stringnow) {
+                            addarg();
+                            args.arg = '';
+                            i++;
+                            continue;
+                        };
+                    };
+
+                    if(char == '\\') {
+                        args.skip = true;
+                        continue;
+                    };
+
+                    if(args.skip) {
+                        args.skip = false;
+                        continue;
+                    };
+
+                    if(char == ')') {
+                        if(!args.stringnow) {
+                            break;
+                        };
+                    };
+
+                    args.arg += char;
+                };
+
+                addarg();
+            };
+        };
 
         static exec(code, isProject) {
             RunHandler.Runtime.sessionVars = {};
@@ -98,32 +177,45 @@ class RunHandler {
                     continue;
                 };
 
-                fragment[0] = fragment[0].split('.');
+                /*
+                    fragment[0] = fragment[0].split('.');
 
-                lastargOfFuncHandler = fragment[0][fragment[0].length - 1];
-                for(let char of lastargOfFuncHandler) {
-                    if(char == '(') {
-                        break;
+                    lastargOfFuncHandler = fragment[0][fragment[0].length - 1];
+                    for(let char of lastargOfFuncHandler) {
+                        if(char == '(') {
+                            break;
+                        };
+
+                        lastargOfFuncHandler = lastargOfFuncHandler.substring(1);
                     };
-
-                    lastargOfFuncHandler = lastargOfFuncHandler.substring(1);
-                };
                 
-                fragment[0][fragment[0].length - 1] = fragment[0][fragment[0].length - 1].substring(0, 
-                    fragment[0][fragment[0].length - 1].length - lastargOfFuncHandler.length);
+                    fragment[0][fragment[0].length - 1] = fragment[0][fragment[0].length - 1].substring(0, 
+                        fragment[0][fragment[0].length - 1].length - lastargOfFuncHandler.length);
 
-                func = RunHandler.Runtime.sessionVars[fragment[0][0]];
-                for(let i = 1; i < fragment[0].length; i++) {
-                    package3 = fragment[0][i];
-                    func = func[package3];
+                    func = RunHandler.Runtime.sessionVars[fragment[0][0]];
+                    for(let i = 1; i < fragment[0].length; i++) {
+                        package3 = fragment[0][i];
+                        func = func[package3];
+                    };
+                */
+
+                lastargOfFuncHandler = fragment[0];
+                for(let i = 0; i < fragment[0].length; i++) {
+                    if(fragment[0][i] == '(') {
+                        fragment[0] = fragment[0].substring(0, i);
+                        lastargOfFuncHandler = lastargOfFuncHandler.substring(i);
+                    };
                 };
+
+                func = eval(`RunHandler.Runtime.sessionVars.${fragment[0]}`);
 
                 if(typeof func === 'undefined') {
-                    err(`${fragment[0].join('.')} not defined`);
+                    err(`${fragment[0]} not defined`);
                 };
 
                 if(typeof func == 'function') {
-                    func(lastargOfFuncHandler);
+                    RunHandler.Runtime.Arguments.debug(lastargOfFuncHandler)
+                    func(...RunHandler.Runtime.Arguments.returnargs);
                 };
             };
         };
