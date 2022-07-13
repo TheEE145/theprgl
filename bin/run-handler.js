@@ -46,10 +46,11 @@ class RunHandler {
         static end;
 
         static Arguments = class {
-            static returnargs = [];
-            static stringnow = false;
-            static skip = false;
-            static arg = '';
+            static formatedArg;
+            static returnargs;
+            static stringnow;
+            static skip;
+            static arg;
 
             static debug(text) {
                 let args = RunHandler.Runtime.Arguments;
@@ -70,9 +71,18 @@ class RunHandler {
                         return;
                     };
 
+                    args.formatedArg = args.arg.split(' ');
 
-                    if(!args.arg.match(/[A-Za-z_]/)) {
-                        args.arg = eval(args.arg);
+                    for(let i = 0; i < args.formatedArg.length; i++) {
+                        if(args.formatedArg[i].startsWith('$')) {
+                            args.formatedArg[i] = RunHandler.Runtime.sessionVars[args.formatedArg[i].substring(1)];
+                        };
+                    };
+
+                    args.formatedArg = args.formatedArg.join(' ');
+
+                    if(!args.formatedArg.match(/[A-Za-z_]/)) {
+                        args.arg = eval(args.formatedArg.replace(/(\s+|\t+|\n+|\r+)/g, ''));
                         addarg2();
                     } else {
                         args.arg = eval(`RunHandler.Runtime.sessionVars.${args.arg}`);
@@ -188,13 +198,9 @@ class RunHandler {
                         err(`uknown symbol, ${fragment[2]}`);
                     };
 
-                    this.Arguments.debug(fragment[3]);
+                    this.Arguments.debug(fragment.slice(3).join(' '));
                     this.sessionVars[fragment[1]] = this.Arguments.returnargs;
-
-                    if(this.sessionVars[fragment[1]].length == 1) {
-                        this.sessionVars[fragment[1]] = this.sessionVars[fragment[1]][0];
-                    };
-
+                    this.sessionVars[fragment[1]] = this.sessionVars[fragment[1]][0];
                     continue;
                 };
 
