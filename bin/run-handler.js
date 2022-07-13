@@ -1,15 +1,5 @@
 const fs = require('fs');
-const err = require('./err').error;
-const errr = require('./err');
-
-let
-    lastargOfFuncHandler,
-    component,
-    fragment,
-    from,
-    func,
-    line,
-    as2;
+const err = require('./err');
 
 class RunHandler {
     static Reader = class {
@@ -54,42 +44,42 @@ class RunHandler {
             static arg;
 
             static debug(text) {
-                let args = RunHandler.Runtime.Arguments;
+                this.returnargs = [];
+                this.stringnow = false;
+                this.skip = false;
+                this.arg = '';
 
-                args.returnargs = [];
-                args.stringnow = false;
-                args.skip = false;
-                args.arg = '';
+                let this2 = RunHandler.Runtime.Arguments;
 
                 function addarg2() {
-                    args.returnargs.push(args.arg);
+                    this2.returnargs.push(this2.arg);
                 };
 
                 function addarg() {
-                    if(args.arg.startsWith('"') && args.arg.endsWith('"')) {
-                        args.arg = args.arg.substring(1, args.arg.length - 1);
+                    if(this2.arg.startsWith('"') && this2.arg.endsWith('"')) {
+                        this2.arg = this2.arg.substring(1, this2.arg.length - 1);
                         addarg2();
                         return;
                     };
 
-                    args.formatedArg = args.arg.split(' ');
+                    this2.formatedArg = this2.arg.split(' ');
 
-                    for(let i = 0; i < args.formatedArg.length; i++) {
-                        if(args.formatedArg[i].startsWith('$')) {
-                            args.formatedArg[i] = eval(`RunHandler.Runtime.sessionVars.${args.formatedArg[i].substring(1)}`);
+                    for(let i = 0; i < this2.formatedArg.length; i++) {
+                        if(this2.formatedArg[i].startsWith('$')) {
+                            this2.formatedArg[i] = eval(`RunHandler.Runtime.sessionVars.${this2.formatedArg[i].substring(1)}`);
                         };
                     };
 
-                    args.formatedArg = args.formatedArg.join(' ');
+                    this2.formatedArg = this2.formatedArg.join(' ');
 
-                    if(!args.formatedArg.match(/[A-Za-z_]/)) {
-                        args.arg = eval(args.formatedArg.replace(/(\s+|\t+|\n+|\r+)/g, ''));
+                    if(!this2.formatedArg.match(/[A-Za-z_]/)) {
+                        this2.arg = eval(this2.formatedArg.replace(/(\s+|\t+|\n+|\r+)/g, ''));
                         addarg2();
                     } else {
-                        args.arg = eval(`RunHandler.Runtime.sessionVars.${args.arg}`);
+                        this2.arg = eval(`RunHandler.Runtime.sessionVars.${this2.arg}`);
 
-                        if(args.arg === 'undefined') {
-                            err(`${args.arg} not defined`);
+                        if(this2.arg === 'undefined') {
+                            err.error(`${this2.arg} not defined`);
                         };
 
                         addarg2();
@@ -99,39 +89,39 @@ class RunHandler {
                 for(let char, i = 0; i < text.length; i++) {
                     char = text[i];
                     if(char == '"') {
-                        args.arg += '"';
-                        if(!args.skip) {
-                            args.stringnow = !args.stringnow;
+                        this.arg += '"';
+                        if(!this.skip) {
+                            this.stringnow = !this.stringnow;
                             continue;
                         };
                     };
 
                     if(char == ',') {
-                        if(!args.stringnow) {
+                        if(!this.stringnow) {
                             addarg();
-                            args.arg = '';
+                            this.arg = '';
                             i++;
                             continue;
                         };
                     };
 
                     if(char == '\\') {
-                        args.skip = true;
+                        this.skip = true;
                         continue;
                     };
 
-                    if(args.skip) {
-                        args.skip = false;
+                    if(this.skip) {
+                        this.skip = false;
                         continue;
                     };
 
                     if(char == ')') {
-                        if(!args.stringnow) {
+                        if(!this.stringnow) {
                             break;
                         };
                     };
 
-                    args.arg += char;
+                    this.arg += char;
                 };
 
                 addarg();
@@ -140,7 +130,9 @@ class RunHandler {
 
         static exec(code, isProject, path, args, attributes) {
             this.sessionVars = {
-                argv: [...args]
+                argv: [...args],
+                true: true,
+                false: false
             };
 
             this.line = 0;
@@ -152,87 +144,108 @@ class RunHandler {
 
             code = code.split(';');
             for(this.line = 0; this.line < code.length; this.line++) {
-                line = this.line;
+                this.stack.line = this.sessionVars.line = this.line;
                 if(this.end) {
                     break;
                 };
 
-                fragment = RunHandler.Reader.trim(code[line]).split(' ');
+                this.stack.fragment = RunHandler.Reader.trim(code[this.stack.line]).split(' ');
 
-                if(fragment[0] == '') {
+                if(this.stack.fragment[0] == '') {
                     continue;
                 };
 
-                if(fragment[0] == 'import') {
-                    component = as2 = fragment[1];
+                if(this.stack.fragment[0] == 'import') {
+                    this.stack.component = this.stack.as2 = this.stack.fragment[1];
 
-                    if(fragment[2] == 'from') {
-                        from = fragment[3];
+                    if(this.stack.fragment[2] == 'from') {
+                        this.stack.from = this.stack.fragment[3];
                     } else {
-                        err(`uknown word ${fragment[2]}`);
+                        err.error(`uknown word ${this.stack.fragment[2]}`);
                     };
 
-                    if(fragment.length > 4) {
-                        if(fragment[4] == 'as') {
-                            if(fragment.length == 6) {
-                                as2 = fragment[5];
+                    if(this.stack.fragment.length > 4) {
+                        if(this.stack.fragment[4] == 'as') {
+                            if(this.stack.fragment.length == 6) {
+                                this.stack.as2 = this.stack.fragment[5];
                             };
                         } else {
-                            err(`uknown word ${fragment[4]}`);
+                            err.error(`uknown word ${this.stack.fragment[4]}`);
+                        };
+                    } else {
+                        if(this.stack.as2.split('.').length > 1) {
+                            this.stack.as2 = this.stack.as2.split('.');
+                            this.stack.as2 = this.stack.as2[this.stack.as2.length - 1];
                         };
                     };
 
-                    component = component.replace('.', '\\');
+                    this.stack.component = this.stack.component.replace('.', '\\');
 
-                    if(from == 'prgl') {
-                        component = `${path}\\modules\\${component}`;
+                    if(this.stack.from == 'prgl') {
+                        this.stack.component = `${path}\\modules\\${this.stack.component}`;
 
-                        if(fs.existsSync(component) || fs.existsSync(component + '.js')) {
-                            if(fs.lstatSync(component).isDirectory()) {
-                                this.sessionVars[as2] = RunHandler.Reader.class(component, true);
+                        if(fs.existsSync(this.stack.component) || fs.existsSync(this.stack.component + '.js')) {
+                            if(fs.lstatSync(this.stack.component).isDirectory()) {
+                                this.sessionVars[this.stack.as2] = RunHandler.Reader.class(this.stack.component, true);
                             } else {
-                                this.sessionVars[as2] = require(`${component}.js`);
+                                this.sessionVars[this.stack.as2] = require(`${this.stack.component}.js`);
                             };
                         } else {
-                            err(`module ${component} not found`);
+                            err.error(`module ${this.stack.component} not found`);
                         };
                     };
 
                     continue;
                 };
 
-                if((fragment[0] == 'define') || (fragment[0] == 'set')) {
+                if((this.stack.fragment[0] == 'define') || (this.stack.fragment[0] == 'set')) {
                     if(!this.stack.force) {
-                        if(fragment[0] == 'define') {
-                            errr.warn('"define" is deprecated, use "set" instead');
+                        if(this.stack.fragment[0] == 'define') {
+                            err.warn('"define" is deprecated, use "set" instead');
                         };
                     };
 
-                    if(fragment[2] != '=') {
-                        err(`uknown symbol, ${fragment[2]}`);
+                    if(this.stack.fragment[2] != '=') {
+                        err.error(`uknown symbol, ${this.stack.fragment[2]}`);
                     };
 
-                    this.Arguments.debug(fragment.slice(3).join(' '));
-                    this.sessionVars[fragment[1]] = this.Arguments.returnargs;
-                    this.sessionVars[fragment[1]] = this.sessionVars[fragment[1]][0];
+                    this.stack.fragment[3] = this.stack.fragment.slice(3).join(' ');
+
+                    this.stack.array = false;
+                    if(this.stack.fragment[3].startsWith('[')) {
+                        if(this.stack.fragment[3].endsWith(']')) {
+                            this.stack.fragment[3] = this.stack.fragment[3]
+                                .substring(1, this.stack.fragment[3].length - 1);
+                            
+                            this.stack.array = true;
+                        };
+                    };
+
+                    this.Arguments.debug(this.stack.fragment[3]);
+                    this.sessionVars[this.stack.fragment[1]] = this.Arguments.returnargs;
+                    
+                    if(!this.stack.array) {
+                        this.sessionVars[this.stack.fragment[1]] = this.sessionVars[this.stack.fragment[1]][0];
+                    };
+
                     continue;
                 };
 
-                lastargOfFuncHandler = fragment[0];
-                for(let i = 0; i < fragment[0].length; i++) {
-                    if(fragment[0][i] == '(') {
-                        fragment[0] = fragment[0].substring(0, i);
-                        lastargOfFuncHandler = lastargOfFuncHandler.substring(i);
+                this.stack.laoffh = this.stack.fragment[0];
+                for(let i = 0; i < this.stack.fragment[0].length; i++) {
+                    if(this.stack.fragment[0][i] == '(') {
+                        this.stack.fragment[0] = this.stack.fragment[0].substring(0, i);
+                        this.stack.laoffh = this.stack.laoffh.substring(i);
                     };
                 };
 
-                func = eval(`RunHandler.Runtime.sessionVars.${fragment[0]}`);
-                if(typeof func == 'function') {
-                    lastargOfFuncHandler = lastargOfFuncHandler.substring(1, lastargOfFuncHandler.length);
-                    fragment.shift();
+                this.stack.func = eval(`RunHandler.Runtime.sessionVars.${this.stack.fragment[0]}`);
+                if(typeof this.stack.func == 'function') {
+                    this.stack.laoffh = this.stack.laoffh.substring(1, this.stack.laoffh.length);
+                    this.stack.fragment.shift();
 
-                    this.Arguments.debug(`${lastargOfFuncHandler} ${fragment.join(' ')}`);
-                    func(...this.Arguments.returnargs);
+                    this.Arguments.debug(`${this.stack.laoffh} ${this.stack.fragment.join(' ')}`);
+                    this.stack.func(...this.Arguments.returnargs);
                 };
             };
         };

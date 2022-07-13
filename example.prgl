@@ -1,13 +1,14 @@
 import System from prgl;
-import Flow from prgl;
+import System.Flow from prgl;
+import ArrayUtils from prgl as Array;
 
-define i = 0;
-define g = 1;
+define i = [0, 1];
 
-System.Console.print(g);
-define i = $i + 1;
-define g = $g * 2;
-Flow.jump(4, $i <= $argv[0]);
+System.Console.print($i[1]);
+Array.set("i", 0, $i[0] + 1);
+Array.set("i", 1, $i[1] * 2);
+
+Flow.jump($line - 3, $i[0] <= $argv[0]);
 
 Flow.end();
 System.Console.print("don`t print");
