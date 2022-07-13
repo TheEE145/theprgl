@@ -75,7 +75,7 @@ class RunHandler {
 
                     for(let i = 0; i < args.formatedArg.length; i++) {
                         if(args.formatedArg[i].startsWith('$')) {
-                            args.formatedArg[i] = RunHandler.Runtime.sessionVars[args.formatedArg[i].substring(1)];
+                            args.formatedArg[i] = eval(`RunHandler.Runtime.sessionVars.${args.formatedArg[i].substring(1)}`);
                         };
                     };
 

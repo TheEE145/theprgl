@@ -3,12 +3,11 @@ import Flow from prgl;
 
 define i = 0;
 define g = 1;
-define x = argv[0];
 
 System.Console.print(g);
 define i = $i + 1;
 define g = $g * 2;
-Flow.jump(5, $i <= $x);
+Flow.jump(4, $i <= $argv[0]);
 
 Flow.end();
 System.Console.print("don`t print");
