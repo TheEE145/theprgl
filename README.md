@@ -19,3 +19,5 @@ parametrs list:
 
 ## language guide
 guide in example.prgl
+and errors will be print like js error
+because language very strict and free at the same time
