@@ -50,6 +50,12 @@ if(!fs.lstatSync(file).isDirectory()) {
         err('this file not .prgl or .theprgl exception');
     };
     
-    RunHandler.Runtime.exec(fs.readFileSync(file, 'utf8'), false, process.argv[1]);
+    RunHandler.Runtime.exec(
+        fs.readFileSync(file, 'utf8'), 
+        false, 
+        process.argv[1],
+        argv
+    );
+    
     process.exit(0);
 };

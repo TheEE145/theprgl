@@ -1,21 +1,14 @@
 import System from prgl;
 import Flow from prgl;
 
-define g = 1;
 define i = 0;
+define g = 1;
+define x = argv[0];
 
-System.Op.add("i", 1);
 System.Console.print(g);
-define i = @i + 1;
-Flow.jump(4, @i < 50);
+define i = $i + 1;
+define g = $g * 2;
+Flow.jump(5, $i <= $x);
 
-function fractal(n) {
-    let val = 1;
-    for(let i = 1; i <= n; i++) {
-        val *= i;
-    };
-
-    return val;
-};
-
-console.log(fractal(5));
+Flow.end();
+System.Console.print("don`t print");

@@ -137,8 +137,11 @@ class RunHandler {
             };
         };
 
-        static exec(code, isProject, path) {
-            this.sessionVars = {};
+        static exec(code, isProject, path, args) {
+            this.sessionVars = {
+                argv: [...args]
+            };
+
             this.line = 0;
             this.end = false;
 
