@@ -1,5 +1,6 @@
 const fs = require('fs');
-const err = require('./err');
+const err = require('./err').error;
+const errr = require('./err');
 
 let
     lastargOfFuncHandler,
@@ -137,13 +138,17 @@ class RunHandler {
             };
         };
 
-        static exec(code, isProject, path, args) {
+        static exec(code, isProject, path, args, attributes) {
             this.sessionVars = {
                 argv: [...args]
             };
 
             this.line = 0;
             this.end = false;
+
+            this.stack.force = attributes.find(e => {
+                return e == 'force';
+            }) == 'force';
 
             code = code.split(';');
             for(this.line = 0; this.line < code.length; this.line++) {
@@ -196,7 +201,13 @@ class RunHandler {
                     continue;
                 };
 
-                if(fragment[0] == 'define') {
+                if((fragment[0] == 'define') || (fragment[0] == 'set')) {
+                    if(!this.stack.force) {
+                        if(fragment[0] == 'define') {
+                            errr.warn('"define" is deprecated, use "set" instead');
+                        };
+                    };
+
                     if(fragment[2] != '=') {
                         err(`uknown symbol, ${fragment[2]}`);
                     };

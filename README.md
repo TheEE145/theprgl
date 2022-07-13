@@ -14,5 +14,8 @@ programm language on nodeJS
 1. parametrs must start with `--`
 2. file must have `.prgl` or `.theprgl` exception
 
+parametrs list:
+1. `--force` - ignore all warnings
+
 ## language guide
 guide in example.prgl

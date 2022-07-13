@@ -2,7 +2,7 @@
 const process = require('process');
 const RunHandler = require('./run-handler');
 const fs = require('fs');
-const err = require('./err');
+const err = require('./err').error;
 
 let args = [];
 for(let i = 2; i < process.argv.length; i++) {
@@ -54,8 +54,9 @@ if(!fs.lstatSync(file).isDirectory()) {
         fs.readFileSync(file, 'utf8'), 
         false, 
         process.argv[1],
-        argv
+        argv,
+        attributes
     );
-    
+
     process.exit(0);
 };
