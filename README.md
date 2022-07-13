@@ -9,5 +9,10 @@ programm language on nodeJS
 4. if don\`t work type node ., next npm i -g .
 5. you can run .prgl or .theprgl files using command `theprgl-run file.prgl`
 
+## theprgl-run guide
+`theprgl-run <file> <parametrs> :: <args>`
+1. parametrs must start with `--`
+2. file must have `.prgl` or `.theprgl` exception
+
 ## language guide
 guide in example.prgl
