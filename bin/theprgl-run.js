@@ -9,6 +9,13 @@ for(let i = 2; i < process.argv.length; i++) {
     args.push(process.argv[i]);
 };
 
+for(let i = process.argv[1].length; i > 0; i--) {
+    if((process.argv[1][i] == '\\') || (process.argv[1][i] == '/')) {
+        process.argv[1] = process.argv[1].substring(0, i);
+        break;
+    };
+};
+
 let 
     file = null, 
     attributes = [], 
@@ -43,6 +50,6 @@ if(!fs.lstatSync(file).isDirectory()) {
         err('this file not .prgl or .theprgl exception');
     };
     
-    RunHandler.Runtime.exec(fs.readFileSync(file, 'utf8'));
+    RunHandler.Runtime.exec(fs.readFileSync(file, 'utf8'), false, process.argv[1]);
     process.exit(0);
 };

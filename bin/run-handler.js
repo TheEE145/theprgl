@@ -19,7 +19,7 @@ class RunHandler {
                     as3[package2] = RunHandler.Reader.class(`${dir}\\${package2}`, isSystem);
                 } else {
                     if(isSystem) {
-                        as3[package2.substring(0, package2.length - 3)] = require(`.${dir}\\${package2}`);
+                        as3[package2.substring(0, package2.length - 3)] = require(`${dir}\\${package2}`);
                     };
                 };
             };
@@ -127,7 +127,7 @@ class RunHandler {
             };
         };
 
-        static exec(code, isProject) {
+        static exec(code, isProject, path) {
             this.sessionVars = {};
             this.line = 0;
             this.end = false;
@@ -167,13 +167,13 @@ class RunHandler {
                     component = component.replace('.', '\\');
 
                     if(from == 'prgl') {
-                        component = `.\\modules\\${component}`;
+                        component = `${path}\\modules\\${component}`;
 
                         if(fs.existsSync(component) || fs.existsSync(component + '.js')) {
                             if(fs.lstatSync(component).isDirectory()) {
                                 this.sessionVars[as2] = RunHandler.Reader.class(component, true);
                             } else {
-                                this.sessionVars[as2] = require(`../modules/${component}.js`);
+                                this.sessionVars[as2] = require(`${component}.js`);
                             };
                         } else {
                             err(`module ${component} not found`);

@@ -1,5 +1,5 @@
-const err = require("../../bin/err");
-const RunHandler = require("../../bin/run-handler");
+const err = require("../../err");
+const RunHandler = require("../../run-handler");
 
 module.exports = function(line, value) {
     value = value.split(' ');
