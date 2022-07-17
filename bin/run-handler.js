@@ -1,8 +1,57 @@
 const fs = require('fs');
 const err = require('./err');
 
+class Debug {
+    static isNaN(val) {
+        err.error(`${val} is NaN`);
+    };
+
+    static uknownWord(val) {
+        err.error(`uknown word ${val}`);
+    };
+};
+
 class RunHandler {
+    static Find(value) {
+        let func = RunHandler.Runtime.sessionVars;
+        let array;
+
+        for(let val of value.split('.')) {
+            array = false;
+            if(RunHandler.Reader.find(val, '[') != -1) {
+                array = RunHandler.Reader.find(val, '[').other;
+                val = RunHandler.Reader.find(val, '[').text;
+            };
+
+            if(!func.hasOwnProperty(val)) {
+                err.error(`${value} not found`);
+            };
+
+            func = func[val];
+
+            if(array) {
+                func = func[new Function(`return ${array.substring(1, array.length - 1)}`)()];
+            };
+        };
+
+        return func;
+    };
+
     static Reader = class {
+        static find = function(text, char) {
+            for(let i = text.length; i > 0; i--) {
+                if(text[i] == char) {
+                    return {
+                        position: i,
+                        text: text.substring(0, i),
+                        other: text.substring(i)
+                    };
+                };
+            };
+
+            return -1;
+        };
+
         static class = function(dir, isSystem) {
             let as3 = {};
             for(let package2 of fs.readdirSync(dir)) {
@@ -66,17 +115,22 @@ class RunHandler {
 
                     for(let i = 0; i < this2.formatedArg.length; i++) {
                         if(this2.formatedArg[i].startsWith('$')) {
-                            this2.formatedArg[i] = eval(`RunHandler.Runtime.sessionVars.${this2.formatedArg[i].substring(1)}`);
+                            this2.formatedArg[i] = RunHandler.Find(this2.formatedArg[i].substring(1));
                         };
                     };
 
                     this2.formatedArg = this2.formatedArg.join(' ');
 
                     if(!this2.formatedArg.match(/[A-Za-z_]/)) {
-                        this2.arg = eval(this2.formatedArg.replace(/(\s+|\t+|\n+|\r+)/g, ''));
+                        try {
+                            this2.arg = new Function(`return ${this2.formatedArg.replace(/(\s+|\t+|\n+|\r+)/g, '')}`)();
+                        } catch {
+                            Debug.isNaN(this2.arg);
+                        };
+
                         addarg2();
                     } else {
-                        this2.arg = eval(`RunHandler.Runtime.sessionVars.${this2.arg}`);
+                        this2.arg = RunHandler.Find(this2.arg);
 
                         if(this2.arg === 'undefined') {
                             err.error(`${this2.arg} not defined`);
@@ -151,6 +205,10 @@ class RunHandler {
 
                 this.stack.fragment = RunHandler.Reader.trim(code[this.stack.line]).split(' ');
 
+                if(this.stack.fragment[0].startsWith('//')) {
+                    continue;
+                };
+
                 if(this.stack.fragment[0] == '') {
                     continue;
                 };
@@ -161,7 +219,7 @@ class RunHandler {
                     if(this.stack.fragment[2] == 'from') {
                         this.stack.from = this.stack.fragment[3];
                     } else {
-                        err.error(`uknown word ${this.stack.fragment[2]}`);
+                        Debug.uknownWord(this.stack.fragment[2]);
                     };
 
                     if(this.stack.fragment.length > 4) {
@@ -170,7 +228,7 @@ class RunHandler {
                                 this.stack.as2 = this.stack.fragment[5];
                             };
                         } else {
-                            err.error(`uknown word ${this.stack.fragment[4]}`);
+                            Debug.uknownWord(this.stack.fragment[4]);
                         };
                     } else {
                         if(this.stack.as2.split('.').length > 1) {
@@ -179,19 +237,24 @@ class RunHandler {
                         };
                     };
 
-                    this.stack.component = this.stack.component.replace('.', '\\');
+                    this.stack.component = this.stack.component.split('.').join('\\');
+                    this.stack.callbackComponent = this.stack.component;
 
                     if(this.stack.from == 'prgl') {
                         this.stack.component = `${path}\\modules\\${this.stack.component}`;
 
                         if(fs.existsSync(this.stack.component) || fs.existsSync(this.stack.component + '.js')) {
+                            if(!fs.existsSync(this.stack.component)) {
+                                this.stack.component += '.js';
+                            };
+
                             if(fs.lstatSync(this.stack.component).isDirectory()) {
                                 this.sessionVars[this.stack.as2] = RunHandler.Reader.class(this.stack.component, true);
                             } else {
-                                this.sessionVars[this.stack.as2] = require(`${this.stack.component}.js`);
+                                this.sessionVars[this.stack.as2] = require(this.stack.component);
                             };
                         } else {
-                            err.error(`module ${this.stack.component} not found`);
+                            err.error(`module ${this.stack.callbackComponent} not found`);
                         };
                     };
 
@@ -209,6 +272,16 @@ class RunHandler {
                         err.error(`uknown symbol, ${this.stack.fragment[2]}`);
                     };
 
+                    this.stack.defineArray = false;
+                    this.stack.result = RunHandler.Reader.find(this.stack.fragment[1], '[');
+
+                    if(this.stack.result != -1) {
+                        this.stack.fragment[1] = this.stack.result.text;
+
+                        this.stack.result = this.stack.result.other.substring(1, this.stack.result.other.length - 1);
+                        this.stack.defineArray = true;
+                    };
+
                     this.stack.fragment[3] = this.stack.fragment.slice(3).join(' ');
 
                     this.stack.array = false;
@@ -222,10 +295,21 @@ class RunHandler {
                     };
 
                     this.Arguments.debug(this.stack.fragment[3]);
-                    this.sessionVars[this.stack.fragment[1]] = this.Arguments.returnargs;
                     
-                    if(!this.stack.array) {
-                        this.sessionVars[this.stack.fragment[1]] = this.sessionVars[this.stack.fragment[1]][0];
+                    if(!this.stack.defineArray) {
+                        this.sessionVars[this.stack.fragment[1]] = this.Arguments.returnargs;
+
+                        if(!this.stack.array) {
+                            this.sessionVars[this.stack.fragment[1]] = this.sessionVars[this.stack.fragment[1]][0];
+                        };
+                    } else {
+                        try {
+                            this.stack.result = new Function(`return ${this.stack.result}`)();
+                        } catch {
+                            Debug.isNaN(this.stack.result);
+                        };
+
+                        this.sessionVars[this.stack.fragment[1]][this.stack.result] = this.Arguments.returnargs;
                     };
 
                     continue;
@@ -239,7 +323,9 @@ class RunHandler {
                     };
                 };
 
-                this.stack.func = eval(`RunHandler.Runtime.sessionVars.${this.stack.fragment[0]}`);
+                this.stack.func = RunHandler.Find(this.stack.fragment[0]); 
+                //this.stack.func = eval(`RunHandler.Runtime.sessionVars.${this.stack.fragment[0]}`);
+
                 if(typeof this.stack.func == 'function') {
                     this.stack.laoffh = this.stack.laoffh.substring(1, this.stack.laoffh.length);
                     this.stack.fragment.shift();
