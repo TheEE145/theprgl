@@ -1,13 +1,9 @@
-import System.Console.print from prgl;
-import System.Flow from prgl;
-
-define i = [0, 1];
-
-print($i[1]);
-define i[0] = $i[0] + 1;
-define i[1] = $i[1] * 2;
-
-Flow.jump($line - 3, $i[0] <= $argv[0]);
-
-Flow.end();
+$%>>> System.Console.print >>>() prgl;
+$%>>> System.Flow >>>() prgl && flowx;
+s>x% i >> [0, 1];
+print(g#i[1]);
+s>x% i[0] >> g#i[0] + 1;
+s>x% i[1] >> g#i[1] * 2;
+flowx:{}/jump(g#line - 3, g#i[0] <= g#argv[0]);
+flowx:{}/end();
 print("don`t print");

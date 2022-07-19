@@ -16,7 +16,7 @@ class RunHandler {
         let func = RunHandler.Runtime.sessionVars;
         let array;
 
-        for(let val of value.split('.')) {
+        for(let val of value.split(':{}/')) {
             array = false;
             if(RunHandler.Reader.find(val, '[') != -1) {
                 array = RunHandler.Reader.find(val, '[').other;
@@ -114,8 +114,8 @@ class RunHandler {
                     this2.formatedArg = this2.arg.split(' ');
 
                     for(let i = 0; i < this2.formatedArg.length; i++) {
-                        if(this2.formatedArg[i].startsWith('$')) {
-                            this2.formatedArg[i] = RunHandler.Find(this2.formatedArg[i].substring(1));
+                        if(this2.formatedArg[i].startsWith('g#')) {
+                            this2.formatedArg[i] = RunHandler.Find(this2.formatedArg[i].substring(2));
                         };
                     };
 
@@ -213,17 +213,17 @@ class RunHandler {
                     continue;
                 };
 
-                if(this.stack.fragment[0] == 'import') {
+                if(this.stack.fragment[0] == '$%>>>') {
                     this.stack.component = this.stack.as2 = this.stack.fragment[1];
 
-                    if(this.stack.fragment[2] == 'from') {
+                    if(this.stack.fragment[2] == '>>>()') {
                         this.stack.from = this.stack.fragment[3];
                     } else {
                         Debug.uknownWord(this.stack.fragment[2]);
                     };
 
                     if(this.stack.fragment.length > 4) {
-                        if(this.stack.fragment[4] == 'as') {
+                        if(this.stack.fragment[4] == '&&') {
                             if(this.stack.fragment.length == 6) {
                                 this.stack.as2 = this.stack.fragment[5];
                             };
@@ -261,14 +261,8 @@ class RunHandler {
                     continue;
                 };
 
-                if((this.stack.fragment[0] == 'define') || (this.stack.fragment[0] == 'set')) {
-                    if(!this.stack.force) {
-                        if(this.stack.fragment[0] == 'define') {
-                            err.warn('"define" is deprecated, use "set" instead');
-                        };
-                    };
-
-                    if(this.stack.fragment[2] != '=') {
+                if(this.stack.fragment[0] == 's>x%') {
+                    if(this.stack.fragment[2] != '>>') {
                         err.error(`uknown symbol, ${this.stack.fragment[2]}`);
                     };
 
