@@ -3,11 +3,11 @@ const err = require('./err');
 
 class Debug {
     static isNaN(val) {
-        err.error(`${val} is NaN`);
+        err.error(`${val} is NaN, line ${RunHandler.Runtime.line}`);
     };
 
     static uknownWord(val) {
-        err.error(`uknown word ${val}`);
+        err.error(`uknown word ${val}, line ${RunHandler.Runtime.line}`);
     };
 };
 
@@ -24,7 +24,7 @@ class RunHandler {
             };
 
             if(!func.hasOwnProperty(val)) {
-                err.error(`${value} not found`);
+                err.error(`${value} not found, line ${RunHandler.Runtime.line}, reading ${val}`);
             };
 
             func = func[val];
@@ -106,7 +106,7 @@ class RunHandler {
 
                 function addarg() {
                     if(this2.arg.startsWith('"') && this2.arg.endsWith('"')) {
-                        this2.arg = this2.arg.substring(1, this2.arg.length - 1);
+                        this2.arg = Buffer.from(this2.arg.substring(1, this2.arg.length - 1), 'base64').toString('utf8');
                         addarg2();
                         return;
                     };
@@ -114,8 +114,8 @@ class RunHandler {
                     this2.formatedArg = this2.arg.split(' ');
 
                     for(let i = 0; i < this2.formatedArg.length; i++) {
-                        if(this2.formatedArg[i].startsWith('g#')) {
-                            this2.formatedArg[i] = RunHandler.Find(this2.formatedArg[i].substring(2));
+                        if(this2.formatedArg[i].startsWith('S2V0#')) {
+                            this2.formatedArg[i] = RunHandler.Find(this2.formatedArg[i].substring(5));
                         };
                     };
 
@@ -133,7 +133,7 @@ class RunHandler {
                         this2.arg = RunHandler.Find(this2.arg);
 
                         if(this2.arg === 'undefined') {
-                            err.error(`${this2.arg} not defined`);
+                            err.error(`${this2.arg} not defined, line ${RunHandler.Runtime.line}`);
                         };
 
                         addarg2();
@@ -240,7 +240,7 @@ class RunHandler {
                     this.stack.component = this.stack.component.split('.').join('\\');
                     this.stack.callbackComponent = this.stack.component;
 
-                    if(this.stack.from == 'prgl') {
+                    if(this.stack.from == 'cHJnbA==') {
                         this.stack.component = `${path}\\modules\\${this.stack.component}`;
 
                         if(fs.existsSync(this.stack.component) || fs.existsSync(this.stack.component + '.js')) {
@@ -254,16 +254,16 @@ class RunHandler {
                                 this.sessionVars[this.stack.as2] = require(this.stack.component);
                             };
                         } else {
-                            err.error(`module ${this.stack.callbackComponent} not found`);
+                            err.error(`module ${this.stack.callbackComponent} not defined, line ${RunHandler.Runtime.line}`);
                         };
                     };
 
                     continue;
                 };
 
-                if(this.stack.fragment[0] == 's>x%') {
+                if(this.stack.fragment[0] == 'c2V0') {
                     if(this.stack.fragment[2] != '>>') {
-                        err.error(`uknown symbol, ${this.stack.fragment[2]}`);
+                        err.error(`uknown symbol ${this.stack.fragment[2]}, line ${RunHandler.Runtime.line}`);
                     };
 
                     this.stack.defineArray = false;
