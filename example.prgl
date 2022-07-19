@@ -1,11 +1,14 @@
-$%>>> VEhFUFJHTA==.U1RE.U1RET1VU >>>() cHJnbA== && print;
-$%>>> VEhFUFJHTA==.Q09OVFJPTA== >>>() cHJnbA== && @flwx;
-$%>>> VEhFUFJHTA==.U1RSSU5H >>>() cHJnbA== && str;
-c2V0 i >> [0, 1];
-print(S2V0#i[1]);
-c2V0 i[0] >> S2V0#i[0] + 1;
-c2V0 i[1] >> S2V0#i[1] * 2;
-@flwx:{}/bXQ=(S2V0#line - 3, S2V0#i[0] <= S2V0#argv[0]);
-print("dGhpcyB3aWxsIHByaW50ISEh");
-@flwx:{}/ZXgw();
-print("ZG9uYHQgcHJpbnQ=");
+JCU+Pj4= VEhFUFJHTA==.U1RE.U1RET1VU Pj4+KCk= cHJnbA== JiY= cHJpbnQ=;
+JCU+Pj4= VEhFUFJHTA==.Q09OVFJPTA== Pj4+KCk= cHJnbA== JiY= QGZsd3g=;
+
+c2V0 i Pj4= [0, 1];
+cHJpbnQ=(S2V0#i[1]);
+
+c2V0 i[0] Pj4= S2V0#i[0] + 1;
+c2V0 i[1] Pj4= S2V0#i[1] * 2;
+
+QGZsd3g={Ont9Lw==}bXQ=(S2V0#line - 3, S2V0#i[0] <= S2V0#argv[0]);
+
+cHJpbnQ=("dGhpcyB3aWxsIHByaW50ISEh");
+QGZsd3g={Ont9Lw==}ZXgw();
+cHJpbnQ=("ZG9uYHQgcHJpbnQ=");

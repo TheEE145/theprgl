@@ -16,7 +16,7 @@ class RunHandler {
         let func = RunHandler.Runtime.sessionVars;
         let array;
 
-        for(let val of value.split(':{}/')) {
+        for(let val of value.split('{Ont9Lw==}')) {
             array = false;
             if(RunHandler.Reader.find(val, '[') != -1) {
                 array = RunHandler.Reader.find(val, '[').other;
@@ -213,17 +213,31 @@ class RunHandler {
                     continue;
                 };
 
-                if(this.stack.fragment[0] == '$%>>>') {
+                if(this.stack.fragment[0] == 'JCU+Pj4=') {
+                    for(let i = 0; i < this.stack.fragment.length; i++) {
+                        this.stack.fragment[i] = this.stack.fragment[i].replace(/(\n|\s|\t|\r)/, '');
+
+                        for(let l of ['', '\n']) {
+                            if(this.stack.fragment[i] == l) {
+                                delete(this.stack.fragment[i]);
+                            };
+                        };
+                    };
+
+                    this.stack.fragment = this.stack.fragment.filter(e => {
+                        return typeof e !== 'undefined';
+                    });
+
                     this.stack.component = this.stack.as2 = this.stack.fragment[1];
 
-                    if(this.stack.fragment[2] == '>>>()') {
+                    if(this.stack.fragment[2] == 'Pj4+KCk=') {
                         this.stack.from = this.stack.fragment[3];
                     } else {
                         Debug.uknownWord(this.stack.fragment[2]);
                     };
 
                     if(this.stack.fragment.length > 4) {
-                        if(this.stack.fragment[4] == '&&') {
+                        if(this.stack.fragment[4] == 'JiY=') {
                             if(this.stack.fragment.length == 6) {
                                 this.stack.as2 = this.stack.fragment[5];
                             };
@@ -262,7 +276,7 @@ class RunHandler {
                 };
 
                 if(this.stack.fragment[0] == 'c2V0') {
-                    if(this.stack.fragment[2] != '>>') {
+                    if(this.stack.fragment[2] != 'Pj4=') {
                         err.error(`uknown symbol ${this.stack.fragment[2]}, line ${RunHandler.Runtime.line}`);
                     };
 
