@@ -1,9 +1,9 @@
-$%>>> System.Console.print >>>() prgl;
-$%>>> System.Flow >>>() prgl && flowx;
+$%>>> THEPRGL.STD.STDOUT >>>() prgl && print;
+$%>>> THEPRGL.CONTROL >>>() prgl && @flwx;
 s>x% i >> [0, 1];
 print(g#i[1]);
 s>x% i[0] >> g#i[0] + 1;
 s>x% i[1] >> g#i[1] * 2;
-flowx:{}/jump(g#line - 3, g#i[0] <= g#argv[0]);
-flowx:{}/end();
+@flwx:{}/mt(g#line - 3, g#i[0] <= g#argv[0]);
+@flwx:{}/ex0();
 print("don`t print");
